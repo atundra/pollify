@@ -1,7 +1,12 @@
 name: CI
 
 on:
-  push
+  push:
+    paths:
+      - common/**
+      - backend/**
+      - Cargo.toml
+  workflow_dispatch:
 
 jobs:
   build_and_test:
