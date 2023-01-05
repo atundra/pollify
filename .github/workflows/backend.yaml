@@ -1,4 +1,4 @@
-name: CI
+name: Backend Build and Test
 
 on:
   push:
