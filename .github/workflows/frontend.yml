@@ -8,31 +8,43 @@ on:
       - frontend/**
       - Cargo.toml
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
 env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  build:
-
+  check:
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: install toolchain
-      uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        target: wasm32-unknown-unknown
-        override: true
-        profile: minimal
-    - name: Install trunk
-      uses: jetli/trunk-action@v0.1.0
-      with:
-        version: 'latest'
-    - name: Build
-      working-directory: ./frontend
-      run: trunk build
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v2
+
+      - name: Install local toolchain
+        uses: actions-rs/toolchain@v1
+
+      - name: Install trunk
+        uses: jetli/trunk-action@v0.1.0
+        with:
+          version: "latest"
+
+      - name: Toolchain info
+        run: |
+          cargo --version --verbose
+          rustc --version
+          cargo clippy --version
+          trunk --version
+
+      - name: Lint
+        run: |
+          cargo fmt -p common -p frontend -- --check
+          cargo clippy -p common -p frontend -- -D warnings
+
+      - name: Test
+        run: |
+          cargo check -p common -p frontend
+          cargo test -p common -p frontend
+
+      - name: Build
+        working-directory: ./frontend
+        run: |
+          trunk build --release
