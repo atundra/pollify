@@ -7,6 +7,8 @@ on:
       - backend/**
       - Cargo.toml
   workflow_dispatch:
+  pull_request:
+    branches: [ master ]
 
 jobs:
   build_and_test:
