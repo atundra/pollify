@@ -1,26 +1,31 @@
 name: backend_check
 
 on:
+  workflow_dispatch:
   push:
     paths:
       - common/**
       - backend/**
       - Cargo.toml
-  workflow_dispatch:
   pull_request:
-    branches: [ master ]
+    branches: [main]
+
+env:
+  CARGO_TERM_COLOR: always
 
 jobs:
-  build_and_test:
+  check:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Update local toolchain
-        run: |
-          rustup update
-          rustup component add clippy
-          rustup install stable
+      - name: Install local toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: x86_64-unknown-linux-gnu
 
       - name: Toolchain info
         run: |
@@ -30,14 +35,15 @@ jobs:
 
       - name: Lint
         run: |
-          cargo fmt -- --check
-          cargo clippy -- -D warnings
+          cargo fmt -p common -p backend -- --check
+          cargo clippy -p common -p backend -- -D warnings
 
       - name: Test
         run: |
-          cargo check
-          cargo test --all
+          cargo check -p common -p backend
+          cargo test -p common -p backend
 
       - name: Build
+        working-directory: ./backend
         run: |
           cargo build --release
