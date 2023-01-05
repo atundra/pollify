@@ -21,6 +21,11 @@ jobs:
 
       - name: Install local toolchain
         uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          override: true
+          components: rustfmt, clippy
+          target: wasm32-unknown-unknown
 
       - name: Install trunk
         uses: jetli/trunk-action@v0.1.0
