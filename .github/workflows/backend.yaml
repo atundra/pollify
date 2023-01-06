@@ -3,12 +3,17 @@ name: backend_check
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - common/**
       - backend/**
       - Cargo.toml
   pull_request:
     branches: [main]
+    paths:
+      - common/**
+      - backend/**
+      - Cargo.toml
 
 env:
   CARGO_TERM_COLOR: always

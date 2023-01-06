@@ -3,12 +3,17 @@ name: frontend_check
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - common/**
       - frontend/**
       - Cargo.toml
   pull_request:
     branches: [main]
+    paths:
+      - common/**
+      - frontend/**
+      - Cargo.toml
 
 env:
   CARGO_TERM_COLOR: always
