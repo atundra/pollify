@@ -42,6 +42,10 @@ jobs:
           cargo clippy --version
           trunk --version
 
+      - name: Build common and run codegen
+        run: |
+          cargo build --release -p common
+
       - name: Lint
         run: |
           cargo fmt -p common -p frontend -- --check
