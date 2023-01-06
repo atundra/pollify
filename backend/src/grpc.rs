@@ -4,7 +4,7 @@ use hello_world::greeter_server::{Greeter, GreeterServer};
 use hello_world::{HelloReply, HelloRequest};
 
 pub mod hello_world {
-    include!("../../common/codegen/helloworld.rs");
+    include!("../../common/codegen/grpc/helloworld.rs");
 }
 
 #[derive(Debug, Default)]
