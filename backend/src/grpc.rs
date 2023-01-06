@@ -1,11 +1,7 @@
 use tonic::{transport::Server, Request, Response, Status};
 
-use hello_world::greeter_server::{Greeter, GreeterServer};
-use hello_world::{HelloReply, HelloRequest};
-
-pub mod hello_world {
-    include!("../../common/codegen/grpc/helloworld.rs");
-}
+use common::grpc::helloworld::greeter_server::{Greeter, GreeterServer};
+use common::grpc::helloworld::{HelloReply, HelloRequest};
 
 #[derive(Debug, Default)]
 pub struct MyGreeter {}
@@ -18,7 +14,7 @@ impl Greeter for MyGreeter {
     ) -> Result<Response<HelloReply>, Status> {
         println!("Got a request: {:?}", request);
 
-        let reply = hello_world::HelloReply {
+        let reply = HelloReply {
             message: format!("Hello {}!", request.into_inner().name).into(),
         };
 
