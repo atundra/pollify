@@ -3,12 +3,17 @@ name: frontend_check
 on:
   workflow_dispatch:
   push:
+    branches: [main]
     paths:
       - common/**
       - frontend/**
       - Cargo.toml
   pull_request:
     branches: [main]
+    paths:
+      - common/**
+      - frontend/**
+      - Cargo.toml
 
 env:
   CARGO_TERM_COLOR: always
@@ -18,6 +23,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install Protoc
+        uses: arduino/setup-protoc@v1
 
       - name: Install local toolchain
         uses: actions-rs/toolchain@v1
@@ -38,6 +46,10 @@ jobs:
           rustc --version
           cargo clippy --version
           trunk --version
+
+      - name: Build common and run codegen
+        run: |
+          cargo build --release -p common
 
       - name: Lint
         run: |
