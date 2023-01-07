@@ -1,4 +1,6 @@
 mod app;
+mod component;
+mod router;
 
 use app::App;
 
