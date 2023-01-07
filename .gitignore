@@ -12,3 +12,5 @@ Cargo.lock
 # Tonic codegen files
 /common/codegen/grpc/**
 !/common/codegen/grpc/.gitkeep
+
+.vscode/
