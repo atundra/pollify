@@ -1,17 +1,28 @@
+use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew_router::prelude::*;
 
-use crate::router::Route;
+use crate::codegen::helloworld::greeter_client::Greeter;
+use crate::codegen::helloworld::HelloRequest;
+
+static HOST: &str = "https://localhost:8081";
 
 #[function_component(Create)]
 pub fn create() -> Html {
-    let navigator = use_navigator().unwrap();
+    let onclick = Callback::from(move |_| {
+        spawn_local(async {
+            Greeter::new(HOST.to_string())
+                .say_hello(HelloRequest {
+                    name: "hi".to_string(),
+                })
+                .await
+                .unwrap();
+        })
+    });
 
-    let onclick = Callback::from(move |_| navigator.push(&Route::Home));
     html! {
         <div>
-            <h1>{ "Secure" }</h1>
-            <button {onclick}>{ "Go Home" }</button>
+            <h1>{ "Create" }</h1>
+            <button {onclick}>{ "Run request" }</button>
         </div>
     }
 }
