@@ -13,4 +13,4 @@ web-sys = "0.3.60"
 prost = { workspace = true }
 
 [build-dependencies]
-rust-grpc-web = { git = "https://github.com/purton-tech/rust-grpc-web" }
+rust-grpc-web = { git = "https://github.com/purton-tech/rust-grpc-web", rev = "5dec430" }
