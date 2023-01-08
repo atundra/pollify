@@ -1,5 +1,5 @@
 fn main() {
-    println!("cargo:rerun-if-changed=../proto/helloworld.proto");
+    println!("cargo:rerun-if-changed=../proto");
 
     rust_grpc_web::configure()
         .support_streaming(false)
