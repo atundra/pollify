@@ -8,9 +8,4 @@ edition = "2021"
 [dependencies]
 yew = { version="0.20", features=["csr"] }
 yew-router = "0.17"
-reqwest = "0.11.13"
-web-sys = "0.3.60"
-prost = "0"
 
-[build-dependencies]
-rust-grpc-web = { git = "https://github.com/purton-tech/rust-grpc-web" }

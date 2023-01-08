@@ -1,5 +1,4 @@
 mod app;
-mod codegen;
 mod component;
 mod router;
 
