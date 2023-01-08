@@ -1,7 +1,11 @@
+use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
 
 use common::grpc::helloworld::greeter_server::{Greeter, GreeterServer};
 use common::grpc::helloworld::{HelloReply, HelloRequest};
+use http::header::{HeaderName, HeaderValue, CONTENT_TYPE};
+use tonic_web::GrpcWebLayer;
+use tower_http::cors::{AllowOrigin, CorsLayer};
 
 #[derive(Debug, Default)]
 pub struct MyGreeter {}
@@ -25,10 +29,20 @@ impl Greeter for MyGreeter {
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
-    let greeter = MyGreeter::default();
+    let greeter = GreeterServer::new(MyGreeter::default());
+
+    let cors = CorsLayer::new()
+        .allow_methods([Method::POST])
+        .allow_origin(AllowOrigin::list(HeaderValue::from_str(
+            "http://localhost:8080",
+        )))
+        .allow_headers([CONTENT_TYPE, HeaderName::from_bytes(b"x-grpc-web")?]);
 
     Server::builder()
-        .add_service(GreeterServer::new(greeter))
+        .accept_http1(true)
+        .layer(cors)
+        .layer(GrpcWebLayer::new())
+        .add_service(greeter)
         .serve(addr)
         .await?;
 
