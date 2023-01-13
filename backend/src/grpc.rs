@@ -1,3 +1,5 @@
+use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
+use common::grpc::poll_service::{PollKind, PollKindsResponse};
 use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
 
@@ -26,10 +28,25 @@ impl Greeter for MyGreeter {
     }
 }
 
+#[derive(Default)]
+pub struct MyPollService {}
+
+#[tonic::async_trait]
+impl PollService for MyPollService {
+    async fn poll_kinds(&self, _: Request<()>) -> Result<Response<PollKindsResponse>, Status> {
+        let reply = PollKindsResponse {
+            kinds: vec![PollKind { id: 0 }, PollKind { id: 1 }, PollKind { id: 2 }],
+        };
+
+        Ok(Response::new(reply))
+    }
+}
+
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let addr = "[::1]:50051".parse()?;
     let greeter = GreeterServer::new(MyGreeter::default());
+    let poll_service = PollServiceServer::new(MyPollService::default());
 
     let cors = CorsLayer::new()
         .allow_methods([Method::POST])
@@ -43,6 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .layer(cors)
         .layer(GrpcWebLayer::new())
         .add_service(greeter)
+        .add_service(poll_service)
         .serve(addr)
         .await?;
 
