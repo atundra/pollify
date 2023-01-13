@@ -1,0 +1,12 @@
+syntax = "proto3";
+package poll_service;
+
+import "google/protobuf/empty.proto";
+
+service PollService {
+  rpc PollKinds(google.protobuf.Empty) returns (PollKindsResponse);
+}
+
+message PollKind { int32 id = 1; }
+
+message PollKindsResponse { repeated PollKind kinds = 1; }
