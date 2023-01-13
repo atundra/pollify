@@ -1,5 +1,3 @@
-use std::collections::HashMap;
-
 use yew::prelude::*;
 use yew_hooks::{use_async, use_async_with_options, UseAsyncOptions};
 
