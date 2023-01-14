@@ -2,12 +2,17 @@
 name = "backend"
 version = "0.1.0"
 edition = "2021"
+license = "MIT"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [[bin]]
 name = "grpc"
 path = "src/grpc.rs"
+
+[[bin]]
+name = "web"
+path = "src/web.rs"
 
 [dependencies]
 tonic = { workspace = true }
@@ -17,4 +22,6 @@ common = { path = "../common" }
 tonic-web = "0.5.0"
 tower-http = "0.3.5"
 http = "0.2.8"
-
+actix-web = "4"
+utoipa = { version = "2", features = ["actix_extras"] }
+utoipa-swagger-ui = { version = "2", features = ["actix-web"] }
