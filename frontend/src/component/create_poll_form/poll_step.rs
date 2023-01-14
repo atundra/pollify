@@ -36,7 +36,7 @@ pub fn poll_step(props: &PollStepProps) -> Html {
         AsyncData::Loaded(kinds) => html! {
             <select class="select w-full select-bordered">
                 <option disabled=true selected=true>{"Voting system"}</option>
-                {kinds.into_iter().map(|PollKind { id }| {
+                {kinds.iter().map(|PollKind { id }| {
                     html! { <PollKindOption id={id} /> }
                 }).collect::<Html>()}
             </select>

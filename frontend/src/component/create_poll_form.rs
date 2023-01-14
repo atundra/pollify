@@ -32,7 +32,7 @@ pub struct CreatePollFormProps {
 #[function_component(CreatePollForm)]
 pub fn create_poll_form(CreatePollFormProps { poll_kinds }: &CreatePollFormProps) -> Html {
     let step = use_state_eq(|| CreatePollFormStep::Poll);
-    let form_data = use_state(|| FormData::default());
+    let form_data = use_state(FormData::default);
 
     let on_name_change = {
         let form_data = form_data.clone();
