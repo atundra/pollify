@@ -12,6 +12,7 @@ reqwest = "0.11.13"
 web-sys = "0.3.60"
 prost = { workspace = true }
 yew-hooks = "0.2.0"
+wasm-bindgen = "0.2.83"
 
 [build-dependencies]
 rust-grpc-web = { git = "https://github.com/purton-tech/rust-grpc-web", rev = "5dec430" }
