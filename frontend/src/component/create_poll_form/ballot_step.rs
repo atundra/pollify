@@ -16,7 +16,7 @@ pub struct BallotStepProps {
 #[function_component(BallotStep)]
 pub fn ballot_step(props: &BallotStepProps) -> Html {
     let submit_button_disabled =
-        props.options.len() == 0 || props.options.iter().all(|option| option.title.is_empty());
+        props.options.is_empty() || props.options.iter().all(|option| option.title.is_empty());
     let submit_button_disabled_class = submit_button_disabled.then_some("btn-disabled");
     let submit_button_classes = classes!(
         "btn",
