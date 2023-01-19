@@ -6,6 +6,7 @@ use yew::prelude::*;
 pub struct InputProps {
     pub typ: String,
     pub value: String,
+    #[prop_or_default]
     pub placeholder: String,
     pub class: String,
     pub onchange: Callback<String>,
