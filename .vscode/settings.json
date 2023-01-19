@@ -1,0 +1,8 @@
+{
+    "rust-analyzer.check.extraArgs": [
+        "--",
+        "-D",
+        "warnings"
+    ],
+    "rust-analyzer.check.command": "clippy"
+}
