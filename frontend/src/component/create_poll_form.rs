@@ -1,6 +1,7 @@
 mod ballot_step;
 mod poll_step;
 mod steps;
+mod summary_step;
 
 use std::ops::Deref;
 
@@ -9,12 +10,13 @@ use yew::prelude::*;
 use crate::{
     async_data::AsyncData,
     codegen::poll_service::PollKind,
-    component::create_poll_form::steps::Steps,
     component::create_poll_form::{ballot_step::BallotStep, poll_step::PollStep},
+    component::create_poll_form::{steps::Steps, summary_step::SummaryStep},
 };
 
-#[derive(PartialEq, Clone, Copy)]
+#[derive(PartialEq, Clone, Copy, Default)]
 pub enum CreatePollFormStep {
+    #[default]
     Poll,
     Ballot,
     Summary,
@@ -22,25 +24,38 @@ pub enum CreatePollFormStep {
 
 #[derive(Default, PartialEq, Clone)]
 pub struct VoteOption {
-    title: String,
-    description: String,
+    pub title: String,
+    pub description: String,
 }
 
 #[derive(PartialEq, Clone)]
-struct FormData {
-    name: String,
-    voting_system: Option<String>,
-    slug: String,
-    options: Vec<VoteOption>,
+pub struct FormData {
+    pub name: String,
+    pub voting_system: Option<String>,
+    pub slug: String,
+    pub options: Vec<VoteOption>,
 }
 
 impl Default for FormData {
     fn default() -> Self {
         Self {
-            name: Default::default(),
-            voting_system: Default::default(),
+            // name: Default::default(),
+            name: "Vote for school president".to_string(),
+            // voting_system: Default::default(),
+            voting_system: Some("1".to_string()),
             slug: Default::default(),
-            options: vec![VoteOption::default()],
+            // slug: "yay-president".to_string(),
+            // options: vec![VoteOption::default()],
+            options: vec![
+                VoteOption {
+                    title: "Joe Mama".to_string(),
+                    description: "You know this one".to_string(),
+                },
+                VoteOption {
+                    title: "Joe Biden".to_string(),
+                    description: "Make mmerica".to_string(),
+                },
+            ],
         }
     }
 }
@@ -48,11 +63,17 @@ impl Default for FormData {
 #[derive(Properties, PartialEq, Clone)]
 pub struct CreatePollFormProps {
     pub poll_kinds: AsyncData<Vec<PollKind>, String>,
+    pub on_create: Callback<FormData>,
 }
 
 #[function_component(CreatePollForm)]
-pub fn create_poll_form(CreatePollFormProps { poll_kinds }: &CreatePollFormProps) -> Html {
-    let step = use_state_eq(|| CreatePollFormStep::Ballot);
+pub fn create_poll_form(
+    CreatePollFormProps {
+        poll_kinds,
+        on_create,
+    }: &CreatePollFormProps,
+) -> Html {
+    let step = use_state_eq(CreatePollFormStep::default);
     let form_data = use_state(FormData::default);
 
     let on_name_change = {
@@ -127,6 +148,16 @@ pub fn create_poll_form(CreatePollFormProps { poll_kinds }: &CreatePollFormProps
         })
     };
 
+    let summary_data = (*form_data).clone();
+
+    let on_submit = {
+        let form_data = (*form_data).clone();
+        let on_create = on_create.clone();
+        Callback::from(move |_| {
+            on_create.emit(form_data.clone());
+        })
+    };
+
     html! {
         <div class="max-w-lg m-auto space-y-8">
             <Steps value={*step} />
@@ -152,7 +183,13 @@ pub fn create_poll_form(CreatePollFormProps { poll_kinds }: &CreatePollFormProps
                         on_options_change={on_options_change}
                     />
                 },
-                _ => html! { <div>{"234"}</div> },
+                CreatePollFormStep::Summary => html! {
+                    <SummaryStep
+                        data={summary_data}
+                        on_back={on_go_to_ballot}
+                        on_submit={on_submit}
+                    />
+                },
             }}
         </div>
     }

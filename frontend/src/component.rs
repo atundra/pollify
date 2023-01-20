@@ -3,4 +3,5 @@ mod create_poll_form;
 pub mod home;
 mod input;
 pub mod not_found;
+pub mod poll_page;
 mod select;
