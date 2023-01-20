@@ -5,8 +5,24 @@ import "google/protobuf/empty.proto";
 
 service PollService {
   rpc PollKinds(google.protobuf.Empty) returns (PollKindsResponse);
+
+  rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
 }
 
 message PollKind { int32 id = 1; }
 
 message PollKindsResponse { repeated PollKind kinds = 1; }
+
+message VoteOption {
+  string title = 1;
+  optional string description = 2;
+}
+
+message CreatePollRequest {
+  string title = 1;
+  PollKind kind = 2;
+  optional string slug = 3;
+  repeated VoteOption options = 4;
+}
+
+message CreatePollResponse { int32 id = 1; }

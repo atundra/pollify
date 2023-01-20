@@ -1,5 +1,6 @@
 use yew_hooks::UseAsyncHandle;
 
+#[derive(PartialEq, Clone, Copy)]
 pub enum AsyncData<T, E> {
     Idle,
     Loading,

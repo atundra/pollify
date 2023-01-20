@@ -1,5 +1,7 @@
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
-use common::grpc::poll_service::{PollKind, PollKindsResponse};
+use common::grpc::poll_service::{
+    CreatePollRequest, CreatePollResponse, PollKind, PollKindsResponse,
+};
 use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
 
@@ -39,6 +41,13 @@ impl PollService for MyPollService {
         };
 
         Ok(Response::new(reply))
+    }
+
+    async fn create_poll(
+        &self,
+        _request: Request<CreatePollRequest>,
+    ) -> Result<Response<CreatePollResponse>, Status> {
+        Ok(Response::new(CreatePollResponse { id: 42069 }))
     }
 }
 

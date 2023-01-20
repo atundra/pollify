@@ -1,116 +1,112 @@
-use yew::prelude::*;
-use yew_hooks::{use_async, use_async_with_options, UseAsyncOptions};
+use std::ops::Not;
 
-use crate::async_data::{AsyncData, ToAsyncData};
-use crate::codegen::helloworld::greeter_client::Greeter;
-use crate::codegen::helloworld::{HelloReply, HelloRequest};
+use yew::platform::spawn_local;
+use yew::prelude::*;
+use yew_hooks::{use_async_with_options, use_timeout, UseAsyncOptions};
+use yew_router::prelude::use_navigator;
+
+use crate::async_data::ToAsyncData;
 use crate::codegen::poll_service::poll_service_client::PollService;
-use crate::codegen::poll_service::{PollKind, PollKindsResponse};
+use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
 use crate::component::create_poll_form::CreatePollForm;
+use crate::router::Route;
+
+use super::create_poll_form::FormData;
 
 static HOST: &str = "http://localhost:50051";
 
-#[derive(Properties, PartialEq)]
-pub struct PollKindProps {
-    pub id: i32,
-}
-
-#[function_component(PollKindOption)]
-fn poll_kind(PollKindProps { id }: &PollKindProps) -> Html {
-    let name = match *id {
-        0 => Some("First Past the Post"),
-        1 => Some("Single Transferable Vote"),
-        2 => Some("Additional Member System"),
-        _ => None,
-    };
-
-    html! {
-        <option key={*id} value={id.to_string()}>{name}</option>
-    }
-}
-
 #[function_component(Create)]
 pub fn create() -> Html {
-    let s = use_async(async move {
-        Greeter::new(HOST.to_string())
-            .say_hello(HelloRequest {
-                name: "world".to_string(),
-            })
-            .await
-            .map_err(|_| "Failed to run request")
-    });
+    let poll_service = use_memo(|_| PollService::new(HOST.to_string()), ());
 
-    let onclick = {
-        let s = s.clone();
+    let poll_kinds = {
+        let poll_service = poll_service.clone();
+        use_async_with_options(
+            async move {
+                poll_service
+                    .poll_kinds(())
+                    .await
+                    .map_err(|_| "Failed to load poll kinds".to_string())
+                    .map(|response| response.kinds)
+            },
+            UseAsyncOptions::enable_auto(),
+        )
+    };
 
-        Callback::from(move |_| {
-            s.run();
+    let kinds_async_data = poll_kinds.to_async_data();
+
+    let error_state = use_state_eq(|| None::<String>);
+
+    let hide_alert_timeout = {
+        let error_state = error_state.clone();
+        use_timeout(move || error_state.set(None), 5000)
+    };
+
+    let navigator = use_navigator().unwrap();
+
+    let on_create_poll = {
+        let error_state = error_state.clone();
+        Callback::from(move |form_data: FormData| {
+            let navigator = navigator.clone();
+            let hide_alert_timeout = hide_alert_timeout.clone();
+            let error_state = error_state.clone();
+            let poll_service = poll_service.clone();
+            spawn_local(async move {
+                let response = poll_service
+                    .create_poll(CreatePollRequest {
+                        title: form_data.name,
+                        kind: Some(PollKind {
+                            id: form_data
+                                .voting_system
+                                .map(|id| id.parse::<i32>().unwrap())
+                                .unwrap(),
+                        }),
+                        slug: form_data.slug.is_empty().not().then_some(form_data.slug),
+                        options: form_data
+                            .options
+                            .iter()
+                            .map(|option| VoteOption {
+                                title: option.title.clone(),
+                                description: option
+                                    .description
+                                    .is_empty()
+                                    .not()
+                                    .then_some(option.description.clone()),
+                            })
+                            .collect(),
+                    })
+                    .await
+                    .map_err(|_| "Error: Failed to create a poll, please contact us".to_string())
+                    .map(|response| response.id);
+
+                match response {
+                    Ok(id) => navigator.push(&Route::PollPage { id }),
+                    Err(text) => {
+                        error_state.set(Some(text));
+                        hide_alert_timeout.reset();
+                    }
+                }
+            });
         })
     };
 
-    let async_data = s.to_async_data();
-    let content = match async_data {
-        AsyncData::Idle => "Idle",
-        AsyncData::Loading => "Loading",
-        AsyncData::Loaded(HelloReply { ref message }) => message,
-        AsyncData::Failed(_) => "Failed",
-    };
-
-    let poll_kinds = use_async_with_options(
-        async move {
-            PollService::new(HOST.to_string())
-                .poll_kinds(())
-                .await
-                .map_err(|_| "Failed to load poll kinds")
-        },
-        UseAsyncOptions::enable_auto(),
-    );
-
-    let kinds_async_data = poll_kinds.to_async_data();
-    let kinds_select = match kinds_async_data {
-        AsyncData::Loaded(PollKindsResponse { kinds }) => html! {
-            <select class="select w-full select-bordered">
-                <option disabled=true selected=true>{"Voting system"}</option>
-                {kinds.into_iter().map(|PollKind { id }| {
-                    html! { <PollKindOption id={id} /> }
-                }).collect::<Html>()}
-            </select>
-        },
-        _ => html! {
-            <select class="select w-full select-bordered" disabled={true}>
-                <option disabled=true selected=true>{"Voting system"}</option>
-            </select>
-        },
-    };
-
     html! {
-        <div>
-            <h1>{ "Create" }</h1>
-            <button {onclick}>{ "Run request" }</button>
-            <h2>{"Result"}</h2>
-            <pre>{content}</pre>
-            <div class="space-y-4 mt-4 max-w-md m-auto">
-                <div class="form-control">
-                    <input type="text" placeholder="Poll name" class="input w-full input-bordered" />
-                    <label class="label">
-                        <span class="label-text">{"Publicly available name"}</span>
-                    </label>
-                </div>
-                <div class="form-control">
-                    {kinds_select}
-                    <label class="label">
-                        <span class="label-text">{"Publicly available name"}</span>
-                    </label>
-                </div>
-                <div class="form-control">
-                    <input type="text" placeholder="Slug (optional)" class="input w-full input-bordered" />
-                    <label class="label">
-                        <span class="label-text">{"The poll would be available at: "}<code>{"pollify.com/p/slug"}</code></span>
-                    </label>
-                </div>
-                <button class="btn btn-primary btn-block">{"Create poll"}</button>
+        <div class="flex justify-center items-center h-full">
+            <div class="py-8 w-full">
+                <CreatePollForm
+                    poll_kinds={kinds_async_data}
+                    on_create={on_create_poll}
+                />
             </div>
-            <CreatePollForm />
+            if let Some(text) = (*error_state).clone() {
+                <div class="toast toast-top">
+                    <div class="alert alert-error">
+                        <div>
+                            <span>{text}</span>
+                        </div>
+                    </div>
+                </div>
+            }
         </div>
     }
 }
