@@ -11,8 +11,8 @@ pub enum Route {
     #[at("/create")]
     Create,
 
-    #[at("/p/:id")]
-    PollPage { id: i32 },
+    #[at("/p/:slug")]
+    PollPage { slug: String },
 
     #[not_found]
     #[at("/404")]
@@ -24,7 +24,7 @@ fn switch(routes: Route) -> Html {
         Route::Home => html! { <Home /> },
         Route::Create => html! { <Create /> },
         Route::NotFound => html! { <NotFound /> },
-        Route::PollPage { id } => html! { <PollPage {id} /> },
+        Route::PollPage { slug } => html! { <PollPage {slug} /> },
     }
 }
 

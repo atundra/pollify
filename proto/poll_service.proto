@@ -7,6 +7,8 @@ service PollService {
   rpc PollKinds(google.protobuf.Empty) returns (PollKindsResponse);
 
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
+
+  rpc GetPollBySlug(GetPollBySlugRequest) returns (GetPollBySlugResponse);
 }
 
 message PollKind { int32 id = 1; }
@@ -25,4 +27,17 @@ message CreatePollRequest {
   repeated VoteOption options = 4;
 }
 
-message CreatePollResponse { int32 id = 1; }
+message CreatePollResponse {
+  int32 id = 1;
+  string slug = 2;
+}
+
+message GetPollBySlugRequest { string slug = 1; }
+
+message GetPollBySlugResponse {
+  int32 id = 1;
+  string title = 2;
+  PollKind kind = 3;
+  string slug = 4;
+  repeated VoteOption options = 5;
+}

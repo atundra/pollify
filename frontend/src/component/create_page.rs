@@ -1,39 +1,20 @@
-use std::ops::Not;
-
-use yew::platform::spawn_local;
-use yew::prelude::*;
-use yew_hooks::{use_async_with_options, use_timeout, UseAsyncOptions};
-use yew_router::prelude::use_navigator;
-
-use crate::async_data::ToAsyncData;
-use crate::codegen::poll_service::poll_service_client::PollService;
+use super::create_poll_form::FormData;
 use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
 use crate::component::create_poll_form::CreatePollForm;
+use crate::hooks::use_poll_kinds::use_poll_kinds;
+use crate::hooks::use_poll_service::use_poll_service;
 use crate::router::Route;
-
-use super::create_poll_form::FormData;
-
-static HOST: &str = "http://localhost:50051";
+use std::ops::Not;
+use yew::platform::spawn_local;
+use yew::prelude::*;
+use yew_hooks::use_timeout;
+use yew_router::prelude::use_navigator;
 
 #[function_component(Create)]
 pub fn create() -> Html {
-    let poll_service = use_memo(|_| PollService::new(HOST.to_string()), ());
+    let poll_service = use_poll_service();
 
-    let poll_kinds = {
-        let poll_service = poll_service.clone();
-        use_async_with_options(
-            async move {
-                poll_service
-                    .poll_kinds(())
-                    .await
-                    .map_err(|_| "Failed to load poll kinds".to_string())
-                    .map(|response| response.kinds)
-            },
-            UseAsyncOptions::enable_auto(),
-        )
-    };
-
-    let kinds_async_data = poll_kinds.to_async_data();
+    let kinds_async_data = use_poll_kinds();
 
     let error_state = use_state_eq(|| None::<String>);
 
@@ -77,10 +58,10 @@ pub fn create() -> Html {
                     })
                     .await
                     .map_err(|_| "Error: Failed to create a poll, please contact us".to_string())
-                    .map(|response| response.id);
+                    .map(|response| response.slug);
 
                 match response {
-                    Ok(id) => navigator.push(&Route::PollPage { id }),
+                    Ok(slug) => navigator.push(&Route::PollPage { slug }),
                     Err(text) => {
                         error_state.set(Some(text));
                         hide_alert_timeout.reset();
