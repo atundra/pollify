@@ -4,10 +4,6 @@ use crate::component::create_poll_form::poll_step::poll_kind_id_to_label;
 
 use super::{FormData, VoteOption};
 
-// use crate::component::input::Input;
-
-// use super::VoteOption;
-
 #[derive(Properties, PartialEq)]
 pub struct SummaryStepProps {
     pub on_submit: Callback<()>,
@@ -17,28 +13,6 @@ pub struct SummaryStepProps {
 
 #[function_component(SummaryStep)]
 pub fn summary_step(props: &SummaryStepProps) -> Html {
-    // let submit_button_disabled =
-    //     props.options.is_empty() || props.options.iter().all(|option| option.title.is_empty());
-    // let submit_button_disabled_class = submit_button_disabled.then_some("btn-disabled");
-    // let submit_button_classes =
-    //     classes!("btn", "btn-primary", "px-8", submit_button_disabled_class);
-
-    // let on_next = {
-    //     let on_next = props.on_next.clone();
-    //     Callback::from(move |_| {
-    //         if !submit_button_disabled {
-    //             on_next.emit(());
-    //         }
-    //     })
-    // };
-
-    // let on_back = {
-    //     let on_back = props.on_prev.clone();
-    //     Callback::from(move |_| {
-    //         on_back.emit(());
-    //     })
-    // };
-
     let table_rows = props
         .data
         .options

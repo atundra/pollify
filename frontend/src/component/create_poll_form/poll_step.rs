@@ -86,7 +86,6 @@ pub fn poll_step(props: &PollStepProps) -> Html {
     };
 
     let on_name_change = props.on_name_change.clone();
-    // let on_voting_system_change = props.on_voting_system_change.clone();
     let on_slug_change = props.on_slug_change.clone();
 
     let submit_button_disabled = props.name.is_empty() || props.voting_system.is_none();

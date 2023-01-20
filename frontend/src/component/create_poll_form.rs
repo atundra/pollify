@@ -39,23 +39,23 @@ pub struct FormData {
 impl Default for FormData {
     fn default() -> Self {
         Self {
-            // name: Default::default(),
-            name: "Vote for school president".to_string(),
-            // voting_system: Default::default(),
-            voting_system: Some("1".to_string()),
+            name: Default::default(),
+            // name: "Vote for school president".to_string(),
+            voting_system: Default::default(),
+            // voting_system: Some("1".to_string()),
             slug: Default::default(),
             // slug: "yay-president".to_string(),
-            // options: vec![VoteOption::default()],
-            options: vec![
-                VoteOption {
-                    title: "Joe Mama".to_string(),
-                    description: "You know this one".to_string(),
-                },
-                VoteOption {
-                    title: "Joe Biden".to_string(),
-                    description: "Make mmerica".to_string(),
-                },
-            ],
+            options: vec![VoteOption::default()],
+            // options: vec![
+            //     VoteOption {
+            //         title: "Joe Mama".to_string(),
+            //         description: "You know this one".to_string(),
+            //     },
+            //     VoteOption {
+            //         title: "Joe Biden".to_string(),
+            //         description: "Make mmerica".to_string(),
+            //     },
+            // ],
         }
     }
 }
