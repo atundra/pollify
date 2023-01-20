@@ -159,7 +159,7 @@ pub fn create_poll_form(
     };
 
     html! {
-        <div class="max-w-lg m-auto space-y-8">
+        <div class="max-w-lg m-auto space-y-8 w-full">
             <Steps value={*step} />
             {match *step {
                 CreatePollFormStep::Poll => html! {

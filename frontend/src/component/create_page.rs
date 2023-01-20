@@ -2,12 +2,10 @@ use std::ops::Not;
 
 use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew_hooks::{use_async, use_async_with_options, use_timeout, UseAsyncOptions};
+use yew_hooks::{use_async_with_options, use_timeout, UseAsyncOptions};
 use yew_router::prelude::use_navigator;
 
-use crate::async_data::{AsyncData, ToAsyncData};
-use crate::codegen::helloworld::greeter_client::Greeter;
-use crate::codegen::helloworld::{HelloReply, HelloRequest};
+use crate::async_data::ToAsyncData;
 use crate::codegen::poll_service::poll_service_client::PollService;
 use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
 use crate::component::create_poll_form::CreatePollForm;
@@ -19,31 +17,6 @@ static HOST: &str = "http://localhost:50051";
 
 #[function_component(Create)]
 pub fn create() -> Html {
-    let s = use_async(async move {
-        Greeter::new(HOST.to_string())
-            .say_hello(HelloRequest {
-                name: "world".to_string(),
-            })
-            .await
-            .map_err(|_| "Failed to run request")
-    });
-
-    let onclick = {
-        let s = s.clone();
-
-        Callback::from(move |_| {
-            s.run();
-        })
-    };
-
-    let async_data = s.to_async_data();
-    let content = match async_data {
-        AsyncData::Idle => "Idle",
-        AsyncData::Loading => "Loading",
-        AsyncData::Loaded(HelloReply { ref message }) => message,
-        AsyncData::Failed(_) => "Failed",
-    };
-
     let poll_service = use_memo(|_| PollService::new(HOST.to_string()), ());
 
     let poll_kinds = {
@@ -118,15 +91,13 @@ pub fn create() -> Html {
     };
 
     html! {
-        <div>
-            <h1>{ "Create" }</h1>
-            <button {onclick}>{ "Run request" }</button>
-            <h2>{"Result"}</h2>
-            <pre>{content}</pre>
-            <CreatePollForm
-                poll_kinds={kinds_async_data}
-                on_create={on_create_poll}
-            />
+        <div class="flex justify-center items-center h-full">
+            <div class="py-8 w-full">
+                <CreatePollForm
+                    poll_kinds={kinds_async_data}
+                    on_create={on_create_poll}
+                />
+            </div>
             if let Some(text) = (*error_state).clone() {
                 <div class="toast toast-top">
                     <div class="alert alert-error">
