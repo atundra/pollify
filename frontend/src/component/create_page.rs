@@ -1,13 +1,14 @@
 use super::create_poll_form::FormData;
+use crate::async_data::AsyncData;
 use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
 use crate::component::create_poll_form::CreatePollForm;
 use crate::hooks::use_poll_kinds::use_poll_kinds;
 use crate::hooks::use_poll_service::use_poll_service;
 use crate::router::Route;
+use crate::toast::use_toast;
 use std::ops::Not;
 use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew_hooks::use_timeout;
 use yew_router::prelude::use_navigator;
 
 #[function_component(Create)]
@@ -16,21 +17,28 @@ pub fn create() -> Html {
 
     let kinds_async_data = use_poll_kinds();
 
-    let error_state = use_state_eq(|| None::<String>);
+    let toast = use_toast().unwrap();
 
-    let hide_alert_timeout = {
-        let error_state = error_state.clone();
-        use_timeout(move || error_state.set(None), 5000)
+    {
+        let kinds_async_data = kinds_async_data.clone();
+        use_effect_with_deps(
+            move |data| {
+                if let AsyncData::Failed(error) = data {
+                    toast.error(error.to_string());
+                }
+            },
+            kinds_async_data,
+        );
     };
+
+    let toast = use_toast().unwrap();
 
     let navigator = use_navigator().unwrap();
 
     let on_create_poll = {
-        let error_state = error_state.clone();
         Callback::from(move |form_data: FormData| {
+            let toast = toast.clone();
             let navigator = navigator.clone();
-            let hide_alert_timeout = hide_alert_timeout.clone();
-            let error_state = error_state.clone();
             let poll_service = poll_service.clone();
             spawn_local(async move {
                 let response = poll_service
@@ -62,10 +70,7 @@ pub fn create() -> Html {
 
                 match response {
                     Ok(slug) => navigator.push(&Route::PollPage { slug }),
-                    Err(text) => {
-                        error_state.set(Some(text));
-                        hide_alert_timeout.reset();
-                    }
+                    Err(text) => toast.error(text),
                 }
             });
         })
@@ -79,15 +84,6 @@ pub fn create() -> Html {
                     on_create={on_create_poll}
                 />
             </div>
-            if let Some(text) = (*error_state).clone() {
-                <div class="toast toast-top">
-                    <div class="alert alert-error">
-                        <div>
-                            <span>{text}</span>
-                        </div>
-                    </div>
-                </div>
-            }
         </div>
     }
 }

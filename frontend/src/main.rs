@@ -4,6 +4,7 @@ mod codegen;
 mod component;
 mod hooks;
 mod router;
+mod toast;
 
 use app::App;
 
