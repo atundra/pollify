@@ -1,7 +1,7 @@
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
     CreatePollRequest, CreatePollResponse, GetPollBySlugRequest, GetPollBySlugResponse, PollKind,
-    PollKindsResponse, VoteOption,
+    PollKindsResponse, SubmitVoteRequest, SubmitVoteResponse, VoteOption,
 };
 use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
@@ -67,19 +67,31 @@ impl PollService for MyPollService {
             slug: message.slug,
             options: vec![
                 VoteOption {
+                    id: 0,
                     title: String::from("Wolt Market"),
                     description: Some(String::from("The greatest of them all")),
                 },
                 VoteOption {
+                    id: 1,
                     title: String::from("Bolt Market"),
                     description: Some(String::from("No alcohol but works at late night")),
                 },
                 VoteOption {
+                    id: 2,
                     title: String::from("Glovo Delivery"),
                     description: Some(String::from("Everything you can imagine")),
                 },
             ],
+            finished: false,
+            ballot_id: 0,
         }))
+    }
+
+    async fn submit_vote(
+        &self,
+        _request: Request<SubmitVoteRequest>,
+    ) -> Result<Response<SubmitVoteResponse>, Status> {
+        Ok(Response::new(SubmitVoteResponse {}))
     }
 }
 

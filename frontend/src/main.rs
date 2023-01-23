@@ -3,6 +3,7 @@ mod async_data;
 mod codegen;
 mod component;
 mod hooks;
+mod poll_kind;
 mod router;
 mod toast;
 

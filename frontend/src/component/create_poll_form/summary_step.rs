@@ -1,8 +1,6 @@
-use yew::prelude::*;
-
-use crate::component::create_poll_form::poll_step::poll_kind_id_to_label;
-
 use super::{FormData, VoteOption};
+use crate::poll_kind::poll_kind_id_to_label;
+use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
 pub struct SummaryStepProps {

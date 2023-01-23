@@ -1,9 +1,9 @@
 use super::create_poll_form::FormData;
-use crate::async_data::AsyncData;
-use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
+use crate::codegen::poll_service::{CreatePollRequest, NewVoteOption, PollKind};
 use crate::component::create_poll_form::CreatePollForm;
 use crate::hooks::use_poll_kinds::use_poll_kinds;
 use crate::hooks::use_poll_service::use_poll_service;
+use crate::hooks::use_toast_on_async_data_error::use_toast_on_async_data_error;
 use crate::router::Route;
 use crate::toast::use_toast;
 use std::ops::Not;
@@ -17,19 +17,7 @@ pub fn create() -> Html {
 
     let kinds_async_data = use_poll_kinds();
 
-    let toast = use_toast().unwrap();
-
-    {
-        let kinds_async_data = kinds_async_data.clone();
-        use_effect_with_deps(
-            move |data| {
-                if let AsyncData::Failed(error) = data {
-                    toast.error(error.to_string());
-                }
-            },
-            kinds_async_data,
-        );
-    };
+    use_toast_on_async_data_error(kinds_async_data.clone());
 
     let toast = use_toast().unwrap();
 
@@ -54,7 +42,7 @@ pub fn create() -> Html {
                         options: form_data
                             .options
                             .iter()
-                            .map(|option| VoteOption {
+                            .map(|option| NewVoteOption {
                                 title: option.title.clone(),
                                 description: option
                                     .description

@@ -2,6 +2,7 @@ syntax = "proto3";
 package poll_service;
 
 import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
 
 service PollService {
   rpc PollKinds(google.protobuf.Empty) returns (PollKindsResponse);
@@ -9,22 +10,30 @@ service PollService {
   rpc CreatePoll(CreatePollRequest) returns (CreatePollResponse);
 
   rpc GetPollBySlug(GetPollBySlugRequest) returns (GetPollBySlugResponse);
+
+  rpc SubmitVote(SubmitVoteRequest) returns (SubmitVoteResponse);
 }
 
 message PollKind { int32 id = 1; }
 
 message PollKindsResponse { repeated PollKind kinds = 1; }
 
+message NewVoteOption {
+  string title = 1;
+  optional string description = 2;
+}
+
 message VoteOption {
   string title = 1;
   optional string description = 2;
+  int32 id = 3;
 }
 
 message CreatePollRequest {
   string title = 1;
   PollKind kind = 2;
   optional string slug = 3;
-  repeated VoteOption options = 4;
+  repeated NewVoteOption options = 4;
 }
 
 message CreatePollResponse {
@@ -40,4 +49,14 @@ message GetPollBySlugResponse {
   PollKind kind = 3;
   string slug = 4;
   repeated VoteOption options = 5;
+  bool finished = 6;
+  int32 ballot_id = 7;
 }
+
+message SubmitVoteRequest {
+  int32 ballot_id = 1;
+  int32 option_id = 2;
+  google.protobuf.Timestamp casted_at = 3;
+}
+
+message SubmitVoteResponse {}
