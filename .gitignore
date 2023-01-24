@@ -14,6 +14,3 @@ Cargo.lock
 !/common/codegen/grpc/.gitkeep
 
 .vscode/
-
-# Local backend config file
-/backend/src/settings/config/local.toml
