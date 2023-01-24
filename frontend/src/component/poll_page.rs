@@ -6,10 +6,25 @@ use crate::{
         use_toast_on_async_data_error::use_toast_on_async_data_error,
     },
     poll_kind::poll_kind_id_to_label,
+    toast::use_toast,
 };
 use js_sys::Date;
 use prost_types::Timestamp;
 use yew::{platform::spawn_local, prelude::*};
+
+fn current_timestamp() -> Timestamp {
+    let now = Date::new_0();
+    Timestamp::date_time_nanos(
+        now.get_utc_full_year().into(),
+        (now.get_utc_month() + 1).try_into().unwrap(),
+        now.get_utc_date().try_into().unwrap(),
+        now.get_utc_hours().try_into().unwrap(),
+        now.get_utc_minutes().try_into().unwrap(),
+        now.get_utc_seconds().try_into().unwrap(),
+        now.get_utc_milliseconds() * 1000,
+    )
+    .unwrap()
+}
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct PollPageProps {
@@ -22,6 +37,8 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
     use_toast_on_async_data_error(data.clone());
 
     let selected_option = use_state_eq::<Option<i32>, _>(Default::default);
+
+    let toast = use_toast().unwrap();
 
     let on_close = Callback::noop();
 
@@ -95,28 +112,25 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
 
             let on_submit = {
                 Callback::from(move |_| {
+                    let toast = toast.clone();
                     let poll_service = poll_service.clone();
                     if let Some(option_id) = *selected_option {
                         spawn_local(async move {
-                            let now = Date::new_0();
-                            let timestamp = Timestamp::date_time_nanos(
-                                now.get_utc_full_year().into(),
-                                (now.get_utc_month() + 1).try_into().unwrap(),
-                                now.get_utc_date().try_into().unwrap(),
-                                now.get_utc_hours().try_into().unwrap(),
-                                now.get_utc_minutes().try_into().unwrap(),
-                                now.get_utc_seconds().try_into().unwrap(),
-                                now.get_utc_milliseconds() * 1000,
-                            )
-                            .unwrap();
+                            let request = SubmitVoteRequest {
+                                ballot_id: data.ballot_id,
+                                option_id,
+                                casted_at: Some(current_timestamp()),
+                            };
 
-                            let _ = poll_service
-                                .submit_vote(SubmitVoteRequest {
-                                    ballot_id: data.ballot_id,
-                                    option_id,
-                                    casted_at: Some(timestamp),
-                                })
-                                .await;
+                            let response = poll_service
+                                .submit_vote(request)
+                                .await
+                                .map_err(|_err| "Failed to submit a vote");
+
+                            match response {
+                                Ok(_) => toast.success("Vote submited"),
+                                Err(err) => toast.error(err),
+                            }
                         })
                     }
                 })

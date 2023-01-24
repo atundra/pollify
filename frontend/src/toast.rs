@@ -9,35 +9,37 @@ enum ToastType {
     Success,
 }
 
+type InnerShow = Rc<dyn Fn(&str, Option<u32>, ToastType)>;
+
 #[derive(Clone)]
 pub struct ToastHandler {
-    inner_show: Rc<dyn Fn(String, Option<u32>, ToastType)>,
+    inner_show: InnerShow,
 }
 
 #[allow(dead_code)]
 impl ToastHandler {
-    pub fn error(&self, message: String) {
-        (self.inner_show)(message, None, ToastType::Error);
+    pub fn error(&self, message: impl AsRef<str>) {
+        (self.inner_show)(message.as_ref(), None, ToastType::Error);
     }
 
-    pub fn error_with_timeout(&self, message: String, timeout_millis: u32) {
-        (self.inner_show)(message, Some(timeout_millis), ToastType::Error);
+    pub fn error_with_timeout(&self, message: impl AsRef<str>, timeout_millis: u32) {
+        (self.inner_show)(message.as_ref(), Some(timeout_millis), ToastType::Error);
     }
 
-    pub fn success(&self, message: String) {
-        (self.inner_show)(message, None, ToastType::Success);
+    pub fn success(&self, message: impl AsRef<str>) {
+        (self.inner_show)(message.as_ref(), None, ToastType::Success);
     }
 
-    pub fn success_with_timeout(&self, message: String, timeout_millis: u32) {
-        (self.inner_show)(message, Some(timeout_millis), ToastType::Success);
+    pub fn success_with_timeout(&self, message: impl AsRef<str>, timeout_millis: u32) {
+        (self.inner_show)(message.as_ref(), Some(timeout_millis), ToastType::Success);
     }
 
-    pub fn info(&self, message: String) {
-        (self.inner_show)(message, None, ToastType::Info);
+    pub fn info(&self, message: impl AsRef<str>) {
+        (self.inner_show)(message.as_ref(), None, ToastType::Info);
     }
 
-    pub fn info_with_timeout(&self, message: String, timeout_millis: u32) {
-        (self.inner_show)(message, Some(timeout_millis), ToastType::Info);
+    pub fn info_with_timeout(&self, message: impl AsRef<str>, timeout_millis: u32) {
+        (self.inner_show)(message.as_ref(), Some(timeout_millis), ToastType::Info);
     }
 }
 
@@ -100,7 +102,7 @@ pub fn toast_provider(
 
                 let new_toast = ActiveToast {
                     id: toast_id,
-                    message,
+                    message: message.to_string(),
                     timeout_ref,
                     toast_type,
                 };
