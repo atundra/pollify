@@ -236,3 +236,9 @@
 .sticky .logo-header {
   color: rgb(9 14 52 / var(--tw-text-opacity));
 }
+
+@media screen and (max-width: 560px) {
+  .rightright {
+    right: 0 !important;
+  }  
+}
