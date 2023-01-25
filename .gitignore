@@ -14,3 +14,5 @@ Cargo.lock
 !/common/codegen/grpc/.gitkeep
 
 .vscode/
+
+**/*/.DS_Store
