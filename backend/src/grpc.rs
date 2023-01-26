@@ -1,7 +1,12 @@
+mod settings;
+
+use std::net::SocketAddr;
+
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
     CreatePollRequest, CreatePollResponse, PollKind, PollKindsResponse,
 };
+use settings::SETTINGS;
 use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
 
@@ -53,7 +58,7 @@ impl PollService for MyPollService {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse()?;
+    let addr = SocketAddr::new(SETTINGS.grpc.host, SETTINGS.grpc.port);
     let greeter = GreeterServer::new(MyGreeter::default());
     let poll_service = PollServiceServer::new(MyPollService::default());
 
