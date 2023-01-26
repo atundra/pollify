@@ -15,8 +15,15 @@ pub struct SocketAddrConfig {
 }
 
 #[derive(Debug, Deserialize)]
+pub struct MongoDBConfig {
+    pub connection_string: String,
+    pub database: String,
+}
+
+#[derive(Debug, Deserialize)]
 pub struct Settings {
     pub grpc: SocketAddrConfig,
+    pub mongodb: MongoDBConfig,
 }
 
 impl Settings {

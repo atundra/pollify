@@ -1,3 +1,6 @@
+mod settings;
+mod storage;
+
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder};
 use utoipa::{OpenApi, ToSchema};
 use utoipa_swagger_ui::SwaggerUi;
