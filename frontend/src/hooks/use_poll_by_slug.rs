@@ -23,7 +23,7 @@ pub fn use_poll_by_slug(slug: String) -> AsyncData<GetPollBySlugResponse, String
             poll_service
                 .get_poll_by_slug(GetPollBySlugRequest { slug: slug.clone() })
                 .await
-                .map_err(move |_err| format!("Failed to load poll {}", slug))
+                .map_err(move |_err| format!("Failed to load poll {slug}"))
         },
         UseAsyncOptions::enable_auto(),
     );
