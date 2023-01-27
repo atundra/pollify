@@ -7,34 +7,12 @@ use crate::{
         input::Input,
         select::{Select, SelectItem},
     },
+    poll_kind::poll_kind_id_to_label,
 };
 
 #[derive(Properties, PartialEq)]
 pub struct PollKindProps {
     pub id: i32,
-}
-
-pub fn poll_kind_id_to_label(id: i32) -> Option<String> {
-    match id {
-        0 => Some("First Past the Post".to_string()),
-        1 => Some("Single Transferable Vote".to_string()),
-        2 => Some("Additional Member System".to_string()),
-        _ => None,
-    }
-}
-
-#[function_component(PollKindOption)]
-fn poll_kind(PollKindProps { id }: &PollKindProps) -> Html {
-    let name = match *id {
-        0 => Some("First Past the Post"),
-        1 => Some("Single Transferable Vote"),
-        2 => Some("Additional Member System"),
-        _ => None,
-    };
-
-    html! {
-        <option key={*id} value={id.to_string()}>{name}</option>
-    }
 }
 
 #[derive(Properties, PartialEq)]

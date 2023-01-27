@@ -17,6 +17,7 @@ path = "src/web.rs"
 [dependencies]
 tonic = { workspace = true }
 prost = { workspace = true }
+prost-types = { workspace = true }
 tokio = { version = "1.0", features = ["macros", "rt-multi-thread"] }
 common = { path = "../common" }
 tonic-web = "0.5.0"

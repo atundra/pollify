@@ -4,3 +4,4 @@ members = ["common", "frontend", "backend"]
 [workspace.dependencies]
 tonic = "0.8"
 prost = "0.11"
+prost-types = "0.11.6"

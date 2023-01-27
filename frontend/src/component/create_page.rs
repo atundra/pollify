@@ -1,55 +1,32 @@
+use super::create_poll_form::FormData;
+use crate::codegen::poll_service::{CreatePollRequest, NewVoteOption, PollKind};
+use crate::component::create_poll_form::CreatePollForm;
+use crate::hooks::use_poll_kinds::use_poll_kinds;
+use crate::hooks::use_poll_service::use_poll_service;
+use crate::hooks::use_toast_on_async_data_error::use_toast_on_async_data_error;
+use crate::router::Route;
+use crate::toast::use_toast;
 use std::ops::Not;
-
 use yew::platform::spawn_local;
 use yew::prelude::*;
-use yew_hooks::{use_async_with_options, use_timeout, UseAsyncOptions};
 use yew_router::prelude::use_navigator;
-
-use crate::async_data::ToAsyncData;
-use crate::codegen::poll_service::poll_service_client::PollService;
-use crate::codegen::poll_service::{CreatePollRequest, PollKind, VoteOption};
-use crate::component::create_poll_form::CreatePollForm;
-use crate::router::Route;
-
-use super::create_poll_form::FormData;
-
-static HOST: &str = "http://localhost:50051";
 
 #[function_component(Create)]
 pub fn create() -> Html {
-    let poll_service = use_memo(|_| PollService::new(HOST.to_string()), ());
+    let poll_service = use_poll_service();
 
-    let poll_kinds = {
-        let poll_service = poll_service.clone();
-        use_async_with_options(
-            async move {
-                poll_service
-                    .poll_kinds(())
-                    .await
-                    .map_err(|_| "Failed to load poll kinds".to_string())
-                    .map(|response| response.kinds)
-            },
-            UseAsyncOptions::enable_auto(),
-        )
-    };
+    let kinds_async_data = use_poll_kinds();
 
-    let kinds_async_data = poll_kinds.to_async_data();
+    use_toast_on_async_data_error(kinds_async_data.clone());
 
-    let error_state = use_state_eq(|| None::<String>);
-
-    let hide_alert_timeout = {
-        let error_state = error_state.clone();
-        use_timeout(move || error_state.set(None), 5000)
-    };
+    let toast = use_toast().unwrap();
 
     let navigator = use_navigator().unwrap();
 
     let on_create_poll = {
-        let error_state = error_state.clone();
         Callback::from(move |form_data: FormData| {
+            let toast = toast.clone();
             let navigator = navigator.clone();
-            let hide_alert_timeout = hide_alert_timeout.clone();
-            let error_state = error_state.clone();
             let poll_service = poll_service.clone();
             spawn_local(async move {
                 let response = poll_service
@@ -65,7 +42,7 @@ pub fn create() -> Html {
                         options: form_data
                             .options
                             .iter()
-                            .map(|option| VoteOption {
+                            .map(|option| NewVoteOption {
                                 title: option.title.clone(),
                                 description: option
                                     .description
@@ -77,14 +54,11 @@ pub fn create() -> Html {
                     })
                     .await
                     .map_err(|_| "Error: Failed to create a poll, please contact us".to_string())
-                    .map(|response| response.id);
+                    .map(|response| response.slug);
 
                 match response {
-                    Ok(id) => navigator.push(&Route::PollPage { id }),
-                    Err(text) => {
-                        error_state.set(Some(text));
-                        hide_alert_timeout.reset();
-                    }
+                    Ok(slug) => navigator.push(&Route::PollPage { slug }),
+                    Err(text) => toast.error(text),
                 }
             });
         })
@@ -98,15 +72,6 @@ pub fn create() -> Html {
                     on_create={on_create_poll}
                 />
             </div>
-            if let Some(text) = (*error_state).clone() {
-                <div class="toast toast-top">
-                    <div class="alert alert-error">
-                        <div>
-                            <span>{text}</span>
-                        </div>
-                    </div>
-                </div>
-            }
         </div>
     }
 }

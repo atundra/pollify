@@ -5,7 +5,8 @@ use std::net::SocketAddr;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
-    CreatePollRequest, CreatePollResponse, PollKind, PollKindsResponse,
+    CreatePollRequest, CreatePollResponse, GetPollBySlugRequest, GetPollBySlugResponse, PollKind,
+    PollKindsResponse, SubmitVoteRequest, SubmitVoteResponse, VoteOption,
 };
 use settings::SETTINGS;
 use tonic::codegen::http::Method;
@@ -53,7 +54,50 @@ impl PollService for MyPollService {
         &self,
         _request: Request<CreatePollRequest>,
     ) -> Result<Response<CreatePollResponse>, Status> {
-        Ok(Response::new(CreatePollResponse { id: 42069 }))
+        Ok(Response::new(CreatePollResponse {
+            id: 42069,
+            slug: String::from("asd"),
+        }))
+    }
+
+    async fn get_poll_by_slug(
+        &self,
+        request: Request<GetPollBySlugRequest>,
+    ) -> Result<Response<GetPollBySlugResponse>, Status> {
+        let message = request.into_inner();
+
+        Ok(Response::new(GetPollBySlugResponse {
+            id: 42069,
+            title: String::from("Absolutely unnecessary supermarket/darkstore delivery poll"),
+            kind: Some(PollKind { id: 0 }),
+            slug: message.slug,
+            options: vec![
+                VoteOption {
+                    id: 0,
+                    title: String::from("Wolt Market"),
+                    description: Some(String::from("The greatest of them all")),
+                },
+                VoteOption {
+                    id: 1,
+                    title: String::from("Bolt Market"),
+                    description: Some(String::from("No alcohol but works at late night")),
+                },
+                VoteOption {
+                    id: 2,
+                    title: String::from("Glovo Delivery"),
+                    description: Some(String::from("Everything you can imagine")),
+                },
+            ],
+            finished: false,
+            ballot_id: 0,
+        }))
+    }
+
+    async fn submit_vote(
+        &self,
+        _request: Request<SubmitVoteRequest>,
+    ) -> Result<Response<SubmitVoteResponse>, Status> {
+        Ok(Response::new(SubmitVoteResponse {}))
     }
 }
 
