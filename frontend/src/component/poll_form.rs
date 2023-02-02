@@ -25,10 +25,6 @@ fn current_timestamp() -> Timestamp {
     .unwrap()
 }
 
-fn storage_key(ballot_id: i32) -> String {
-    format!("ballot:{ballot_id}")
-}
-
 #[derive(Properties, PartialEq, Clone)]
 pub struct PollFormProps {
     pub data: GetPollBySlugResponse,
@@ -38,7 +34,7 @@ pub struct PollFormProps {
 pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     let toast = use_toast().unwrap();
 
-    let prev_vote_storage = use_local_storage::<i32>(storage_key(data.ballot_id));
+    let prev_vote_storage = use_local_storage::<i32>(format!("ballot:{}", data.ballot_id));
     let selected_option = use_state_eq::<Option<i32>, _>(|| *prev_vote_storage);
 
     let prev_vote_selected = (*prev_vote_storage)
@@ -192,22 +188,22 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     let data = data.clone();
 
     html! {
-    <div class="my-8 space-y-8">
-      <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight md:text-5xl">{data.title}</h1>
-      if let Some(kind) = data.kind.map(|kind| poll_kind_id_to_label(kind.id)) {
-        <p>{kind}</p>
-      }
-      <div>
-        {rows}
-      </div>
-      <div class="flex justify-between">
+      <div class="my-8 space-y-8">
+        <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight md:text-5xl">{data.title}</h1>
+        if let Some(kind) = data.kind.map(|kind| poll_kind_id_to_label(kind.id)) {
+          <p>{kind}</p>
+        }
         <div>
-          if !data.finished {
-            <button class="btn btn-outline" onclick={on_close}>{"Close the poll"}</button>
-          }
+          {rows}
         </div>
-        <button class={submit_button_class} onclick={on_submit}>{submit_button_text}</button>
+        <div class="flex justify-between">
+          <div>
+            if !data.finished {
+              <button class="btn btn-outline" onclick={on_close}>{"Close the poll"}</button>
+            }
+          </div>
+          <button class={submit_button_class} onclick={on_submit}>{submit_button_text}</button>
+        </div>
       </div>
-    </div>
     }
 }
