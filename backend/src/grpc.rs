@@ -5,8 +5,9 @@ use std::net::SocketAddr;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
-    CreatePollRequest, CreatePollResponse, GetPollBySlugRequest, GetPollBySlugResponse, PollKind,
-    PollKindsResponse, SubmitVoteRequest, SubmitVoteResponse, VoteOption,
+    ClosePollRequest, ClosePollResponse, CreatePollRequest, CreatePollResponse,
+    GetPollBySlugRequest, GetPollBySlugResponse, PollKind, PollKindsResponse, SubmitVoteRequest,
+    SubmitVoteResponse, VoteOption,
 };
 use settings::SETTINGS;
 use tonic::codegen::http::Method;
@@ -98,6 +99,13 @@ impl PollService for MyPollService {
         _request: Request<SubmitVoteRequest>,
     ) -> Result<Response<SubmitVoteResponse>, Status> {
         Ok(Response::new(SubmitVoteResponse {}))
+    }
+
+    async fn close_poll(
+        &self,
+        _request: Request<ClosePollRequest>,
+    ) -> Result<Response<ClosePollResponse>, Status> {
+        Ok(Response::new(ClosePollResponse {}))
     }
 }
 
