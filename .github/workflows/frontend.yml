@@ -66,4 +66,4 @@ jobs:
       - name: Build
         working-directory: ./frontend
         run: |
-          trunk build --release
+          trunk build

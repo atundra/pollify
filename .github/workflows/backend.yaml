@@ -60,4 +60,4 @@ jobs:
       - name: Build
         working-directory: ./backend
         run: |
-          cargo build --release
+          cargo build -p common -p backend
