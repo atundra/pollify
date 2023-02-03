@@ -37,7 +37,7 @@ message CreatePollRequest {
 }
 
 message CreatePollResponse {
-  int32 id = 1;
+  string id = 1;
   string slug = 2;
 }
 

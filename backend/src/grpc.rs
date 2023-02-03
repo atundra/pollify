@@ -1,7 +1,10 @@
 mod settings;
 mod storage;
 
+use mongodb::bson::doc;
+use nanoid::nanoid;
 use std::net::SocketAddr;
+use storage::DATABASE;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
@@ -52,12 +55,40 @@ impl PollService for MyPollService {
 
     async fn create_poll(
         &self,
-        _request: Request<CreatePollRequest>,
+        request: Request<CreatePollRequest>,
     ) -> Result<Response<CreatePollResponse>, Status> {
-        Ok(Response::new(CreatePollResponse {
-            id: 42069,
-            slug: String::from("asd"),
-        }))
+        let CreatePollRequest {
+            title,
+            kind,
+            slug,
+            options: _,
+        } = request.into_inner();
+
+        let kind_id = kind
+            .map(|kind| kind.id)
+            .ok_or_else(|| Status::invalid_argument("Poll kind should not be empty"))?;
+        let slug = slug.unwrap_or(nanoid!());
+
+        let db = DATABASE.get().await;
+        let poll = doc! {
+            "name": title,
+            "created_at": chrono::Utc::now(),
+            "slug": slug.clone(),
+            "kind": kind_id
+        };
+        let poll_insert_result = db
+            .collection("polls")
+            .insert_one(poll, None)
+            .await
+            .map_err(|_err| Status::internal("DB insertion error"))?;
+
+        let id = poll_insert_result
+            .inserted_id
+            .as_object_id()
+            .unwrap()
+            .to_string();
+
+        Ok(Response::new(CreatePollResponse { id, slug }))
     }
 
     async fn get_poll_by_slug(
@@ -112,7 +143,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_origin(AllowOrigin::list(HeaderValue::from_str(
             "http://localhost:8080",
         )))
-        .allow_headers([CONTENT_TYPE, HeaderName::from_bytes(b"x-grpc-web")?]);
+        .allow_headers([CONTENT_TYPE, HeaderName::from_bytes(b"x-grpc-web")?])
+        .expose_headers([
+            HeaderName::from_bytes(b"grpc-status")?,
+            HeaderName::from_bytes(b"grpc-message")?,
+        ]);
 
     Server::builder()
         .accept_http1(true)
