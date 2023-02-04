@@ -26,7 +26,7 @@ message NewVoteOption {
 message VoteOption {
   string title = 1;
   optional string description = 2;
-  int32 id = 3;
+  string id = 3;
 }
 
 message CreatePollRequest {
@@ -44,18 +44,18 @@ message CreatePollResponse {
 message GetPollBySlugRequest { string slug = 1; }
 
 message GetPollBySlugResponse {
-  int32 id = 1;
+  string id = 1;
   string title = 2;
   PollKind kind = 3;
   string slug = 4;
   repeated VoteOption options = 5;
   bool finished = 6;
-  int32 ballot_id = 7;
+  string ballot_id = 7;
 }
 
 message SubmitVoteRequest {
-  int32 ballot_id = 1;
-  int32 option_id = 2;
+  string ballot_id = 1;
+  string option_id = 2;
   google.protobuf.Timestamp casted_at = 3;
 }
 

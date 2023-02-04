@@ -36,7 +36,7 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
     let data = use_poll_by_slug(slug.clone());
     use_toast_on_async_data_error(data.clone());
 
-    let selected_option = use_state_eq::<Option<i32>, _>(Default::default);
+    let selected_option = use_state_eq::<Option<String>, _>(Default::default);
 
     let toast = use_toast().unwrap();
 
@@ -59,8 +59,14 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
                 .map(|(index, VoteOption { title, description, id })| {
                   let onchange = {
                     let selected_option = selected_option.clone();
+                    let id = id.clone();
+
                     Callback::from(move |_| {
-                      let currently_checked = selected_option.map(|option| option == id).unwrap_or(false);
+                      let id = id.clone();
+                      let currently_checked = match &*selected_option {
+                        Some(option) => *option == id,
+                        None => false
+                      };
                       if currently_checked {
                         selected_option.set(None);
                       } else {
@@ -69,7 +75,7 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
                     })
                   };
 
-                  let checked = selected_option.clone().map(|selected| selected == id).unwrap_or(false);
+                  let checked = (*selected_option).clone().map(|selected| selected == id).unwrap_or(false);
 
                   html! {
                     <label key={id} class="flex gap-x-8 justify-between items-center">
@@ -112,16 +118,17 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
 
             let on_submit = {
                 Callback::from(move |_| {
+                    let ballot_id = data.ballot_id.clone();
                     let toast = toast.clone();
                     let poll_service = poll_service.clone();
-                    if let Some(option_id) = *selected_option {
-                        spawn_local(async move {
-                            let request = SubmitVoteRequest {
-                                ballot_id: data.ballot_id,
-                                option_id,
-                                casted_at: Some(current_timestamp()),
-                            };
+                    if let Some(option_id) = &*selected_option {
+                        let request = SubmitVoteRequest {
+                            ballot_id,
+                            option_id: option_id.clone(),
+                            casted_at: Some(current_timestamp()),
+                        };
 
+                        spawn_local(async move {
                             let response = poll_service
                                 .submit_vote(request)
                                 .await
