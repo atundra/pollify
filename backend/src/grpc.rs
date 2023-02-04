@@ -1,15 +1,15 @@
+mod grpc_impl;
+mod model;
 mod settings;
 mod storage;
 
-use mongodb::bson::doc;
-use nanoid::nanoid;
+use grpc_impl::create_poll::create_poll;
 use std::net::SocketAddr;
-use storage::DATABASE;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
-    CreatePollRequest, CreatePollResponse, GetPollBySlugRequest, GetPollBySlugResponse, PollKind,
-    PollKindsResponse, SubmitVoteRequest, SubmitVoteResponse, VoteOption,
+    self, CreatePollRequest, CreatePollResponse, GetPollBySlugRequest, GetPollBySlugResponse,
+    PollKind, PollKindsResponse, SubmitVoteRequest, SubmitVoteResponse,
 };
 use settings::SETTINGS;
 use tonic::codegen::http::Method;
@@ -57,38 +57,7 @@ impl PollService for MyPollService {
         &self,
         request: Request<CreatePollRequest>,
     ) -> Result<Response<CreatePollResponse>, Status> {
-        let CreatePollRequest {
-            title,
-            kind,
-            slug,
-            options: _,
-        } = request.into_inner();
-
-        let kind_id = kind
-            .map(|kind| kind.id)
-            .ok_or_else(|| Status::invalid_argument("Poll kind should not be empty"))?;
-        let slug = slug.unwrap_or(nanoid!());
-
-        let db = DATABASE.get().await;
-        let poll = doc! {
-            "name": title,
-            "created_at": chrono::Utc::now(),
-            "slug": slug.clone(),
-            "kind": kind_id
-        };
-        let poll_insert_result = db
-            .collection("polls")
-            .insert_one(poll, None)
-            .await
-            .map_err(|_err| Status::internal("DB insertion error"))?;
-
-        let id = poll_insert_result
-            .inserted_id
-            .as_object_id()
-            .unwrap()
-            .to_string();
-
-        Ok(Response::new(CreatePollResponse { id, slug }))
+        create_poll(request).await
     }
 
     async fn get_poll_by_slug(
@@ -103,17 +72,17 @@ impl PollService for MyPollService {
             kind: Some(PollKind { id: 0 }),
             slug: message.slug,
             options: vec![
-                VoteOption {
+                poll_service::VoteOption {
                     id: 0,
                     title: String::from("Wolt Market"),
                     description: Some(String::from("The greatest of them all")),
                 },
-                VoteOption {
+                poll_service::VoteOption {
                     id: 1,
                     title: String::from("Bolt Market"),
                     description: Some(String::from("No alcohol but works at late night")),
                 },
-                VoteOption {
+                poll_service::VoteOption {
                     id: 2,
                     title: String::from("Glovo Delivery"),
                     description: Some(String::from("Everything you can imagine")),
