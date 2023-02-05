@@ -14,7 +14,6 @@ service PollService {
   rpc SubmitVote(SubmitVoteRequest) returns (SubmitVoteResponse);
 
   rpc ClosePoll(ClosePollRequest) returns (ClosePollResponse);
-  ;
 }
 
 message PollKind { int32 id = 1; }
