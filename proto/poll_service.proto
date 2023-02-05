@@ -12,6 +12,9 @@ service PollService {
   rpc GetPollBySlug(GetPollBySlugRequest) returns (GetPollBySlugResponse);
 
   rpc SubmitVote(SubmitVoteRequest) returns (SubmitVoteResponse);
+
+  rpc ClosePoll(ClosePollRequest) returns (ClosePollResponse);
+  ;
 }
 
 message PollKind { int32 id = 1; }
@@ -60,3 +63,7 @@ message SubmitVoteRequest {
 }
 
 message SubmitVoteResponse {}
+
+message ClosePollRequest { string ballot_id = 1; }
+
+message ClosePollResponse {}
