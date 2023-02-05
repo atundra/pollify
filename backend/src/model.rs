@@ -34,6 +34,8 @@ pub struct VoteOption {
 
 #[derive(Serialize, Deserialize)]
 pub struct Vote {
-    option_ids: Vec<ObjectId>,
-    created_at: DateTime,
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
+    pub option_ids: Vec<ObjectId>,
+    pub created_at: DateTime,
 }

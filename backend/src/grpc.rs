@@ -5,6 +5,7 @@ mod storage;
 
 use grpc_impl::create_poll::create_poll;
 use grpc_impl::get_poll_by_slug::get_poll_by_slug;
+use grpc_impl::submit_vote::submit_vote;
 use std::net::SocketAddr;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
@@ -71,9 +72,9 @@ impl PollService for MyPollService {
 
     async fn submit_vote(
         &self,
-        _request: Request<SubmitVoteRequest>,
+        request: Request<SubmitVoteRequest>,
     ) -> Result<Response<SubmitVoteResponse>, Status> {
-        Ok(Response::new(SubmitVoteResponse {}))
+        submit_vote(request).await
     }
 
     async fn close_poll(
