@@ -51,6 +51,7 @@ pub async fn submit_vote(
     db.collection::<model::Vote>("votes")
         .insert_one(
             model::Vote {
+                id: None,
                 option_ids: vec![vote_option_oid],
                 created_at: chrono::Utc::now().into(),
             },
