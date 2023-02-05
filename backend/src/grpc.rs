@@ -3,6 +3,7 @@ mod model;
 mod settings;
 mod storage;
 
+use grpc_impl::close_poll::close_poll;
 use grpc_impl::create_poll::create_poll;
 use grpc_impl::get_poll_by_slug::get_poll_by_slug;
 use grpc_impl::submit_vote::submit_vote;
@@ -79,9 +80,9 @@ impl PollService for MyPollService {
 
     async fn close_poll(
         &self,
-        _request: Request<ClosePollRequest>,
+        request: Request<ClosePollRequest>,
     ) -> Result<Response<ClosePollResponse>, Status> {
-        Ok(Response::new(ClosePollResponse {}))
+        close_poll(request).await
     }
 }
 
