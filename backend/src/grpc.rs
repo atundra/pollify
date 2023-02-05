@@ -1,13 +1,16 @@
+mod grpc_impl;
+mod model;
 mod settings;
 mod storage;
 
+use grpc_impl::create_poll::create_poll;
 use std::net::SocketAddr;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
-    ClosePollRequest, ClosePollResponse, CreatePollRequest, CreatePollResponse,
+    self, ClosePollRequest, ClosePollResponse, CreatePollRequest, CreatePollResponse,
     GetPollBySlugRequest, GetPollBySlugResponse, PollKind, PollKindsResponse, SubmitVoteRequest,
-    SubmitVoteResponse, VoteOption,
+    SubmitVoteResponse,
 };
 use settings::SETTINGS;
 use tonic::codegen::http::Method;
@@ -53,12 +56,9 @@ impl PollService for MyPollService {
 
     async fn create_poll(
         &self,
-        _request: Request<CreatePollRequest>,
+        request: Request<CreatePollRequest>,
     ) -> Result<Response<CreatePollResponse>, Status> {
-        Ok(Response::new(CreatePollResponse {
-            id: 42069,
-            slug: String::from("asd"),
-        }))
+        create_poll(request).await
     }
 
     async fn get_poll_by_slug(
@@ -73,17 +73,17 @@ impl PollService for MyPollService {
             kind: Some(PollKind { id: 0 }),
             slug: message.slug,
             options: vec![
-                VoteOption {
+                poll_service::VoteOption {
                     id: 0,
                     title: String::from("Wolt Market"),
                     description: Some(String::from("The greatest of them all")),
                 },
-                VoteOption {
+                poll_service::VoteOption {
                     id: 1,
                     title: String::from("Bolt Market"),
                     description: Some(String::from("No alcohol but works at late night")),
                 },
-                VoteOption {
+                poll_service::VoteOption {
                     id: 2,
                     title: String::from("Glovo Delivery"),
                     description: Some(String::from("Everything you can imagine")),
@@ -120,7 +120,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .allow_origin(AllowOrigin::list(HeaderValue::from_str(
             "http://localhost:8080",
         )))
-        .allow_headers([CONTENT_TYPE, HeaderName::from_bytes(b"x-grpc-web")?]);
+        .allow_headers([CONTENT_TYPE, HeaderName::from_bytes(b"x-grpc-web")?])
+        .expose_headers([
+            HeaderName::from_bytes(b"grpc-status")?,
+            HeaderName::from_bytes(b"grpc-message")?,
+        ]);
 
     Server::builder()
         .accept_http1(true)

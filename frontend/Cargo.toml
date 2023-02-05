@@ -19,4 +19,4 @@ gloo-timers = "0.2.6"
 js-sys = "0.3.60"
 
 [build-dependencies]
-rust-grpc-web = { git = "https://github.com/purton-tech/rust-grpc-web", rev = "5dec430" }
+rust-grpc-web = { git = "https://github.com/pfz4/rust-grpc-web", rev = "2fb0192" }
