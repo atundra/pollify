@@ -2,8 +2,6 @@ use backend::grpc_impl::close_poll::close_poll;
 use backend::grpc_impl::create_poll::create_poll;
 use backend::grpc_impl::get_poll_by_slug::get_poll_by_slug;
 use backend::grpc_impl::submit_vote::submit_vote;
-use std::net::SocketAddr;
-
 use backend::settings::SETTINGS;
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
@@ -11,6 +9,7 @@ use common::grpc::poll_service::{
     GetPollBySlugRequest, GetPollBySlugResponse, PollKind, PollKindsResponse, SubmitVoteRequest,
     SubmitVoteResponse,
 };
+use std::net::SocketAddr;
 use tonic::codegen::http::Method;
 use tonic::{transport::Server, Request, Response, Status};
 
