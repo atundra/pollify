@@ -38,6 +38,7 @@ pub async fn create_poll(
     }
 
     let poll = model::Poll {
+        id: None,
         name: title,
         created_at: chrono::Utc::now().into(),
         slug: slug.clone(),
@@ -52,6 +53,7 @@ pub async fn create_poll(
     let poll_id = poll_insert_result.inserted_id.as_object_id().unwrap();
 
     let ballot = model::Ballot {
+        id: None,
         poll_id,
         finished_at: None,
         created_at: chrono::Utc::now().into(),
@@ -71,6 +73,7 @@ pub async fn create_poll(
         .enumerate()
         .map(
             |(index, NewVoteOption { title, description })| model::VoteOption {
+                id: None,
                 ballot_id,
                 name: title.to_string(),
                 description: description.clone(),

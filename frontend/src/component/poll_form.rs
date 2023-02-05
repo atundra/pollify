@@ -34,11 +34,12 @@ pub struct PollFormProps {
 pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     let toast = use_toast().unwrap();
 
-    let prev_vote_storage = use_local_storage::<i32>(format!("ballot:{}", data.ballot_id));
-    let selected_option = use_state_eq::<Option<i32>, _>(|| *prev_vote_storage);
+    let prev_vote_storage = use_local_storage::<String>(format!("ballot:{}", data.ballot_id));
+    let selected_option = use_state_eq::<Option<String>, _>(|| (*prev_vote_storage).clone());
 
     let prev_vote_selected = (*prev_vote_storage)
-        .zip(*selected_option)
+        .clone()
+        .zip((*selected_option).clone())
         .map(|(prev, current)| prev == current)
         .unwrap_or_default();
 
@@ -59,6 +60,7 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
                 },
             )| {
                 let onchange = {
+                    let id = id.clone();
                     let selected_option = selected_option.clone();
                     let finished = data.finished;
                     Callback::from(move |_| {
@@ -66,8 +68,11 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
                         return;
                       }
 
-                        let currently_checked =
-                            selected_option.map(|option| option == id).unwrap_or(false);
+                      let id = id.clone();
+                      let currently_checked = match &*selected_option {
+                        Some(option) => *option == id,
+                        None => false
+                      };
                         if currently_checked {
                             selected_option.set(None);
                         } else {
@@ -76,10 +81,7 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
                     })
                 };
 
-                let checked = selected_option
-                    .clone()
-                    .map(|selected| selected == id)
-                    .unwrap_or(false);
+                let checked = (*selected_option).clone().map(|selected| selected == id).unwrap_or(false);
 
                 let description = description.unwrap_or_default();
 
@@ -133,18 +135,20 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
         let data = data.clone();
         let toast = toast.clone();
         Callback::from(move |_| {
+            let ballot_id = data.ballot_id.clone();
             let toast = toast.clone();
             let poll_service = poll_service.clone();
-            let data = data.clone();
             let prev_vote_storage = prev_vote_storage.clone();
-            if let Some(option_id) = *selected_option {
-                spawn_local(async move {
-                    let request = SubmitVoteRequest {
-                        ballot_id: data.ballot_id,
-                        option_id,
-                        casted_at: Some(current_timestamp()),
-                    };
+            if let Some(option_id) = &*selected_option {
+                let request = SubmitVoteRequest {
+                    ballot_id,
+                    option_id: option_id.clone(),
+                    casted_at: Some(current_timestamp()),
+                };
 
+                let option_id = option_id.clone();
+
+                spawn_local(async move {
                     let response = poll_service
                         .submit_vote(request)
                         .await

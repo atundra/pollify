@@ -4,11 +4,12 @@ mod settings;
 mod storage;
 
 use grpc_impl::create_poll::create_poll;
+use grpc_impl::get_poll_by_slug::get_poll_by_slug;
 use std::net::SocketAddr;
 
 use common::grpc::poll_service::poll_service_server::{PollService, PollServiceServer};
 use common::grpc::poll_service::{
-    self, ClosePollRequest, ClosePollResponse, CreatePollRequest, CreatePollResponse,
+    ClosePollRequest, ClosePollResponse, CreatePollRequest, CreatePollResponse,
     GetPollBySlugRequest, GetPollBySlugResponse, PollKind, PollKindsResponse, SubmitVoteRequest,
     SubmitVoteResponse,
 };
@@ -65,33 +66,7 @@ impl PollService for MyPollService {
         &self,
         request: Request<GetPollBySlugRequest>,
     ) -> Result<Response<GetPollBySlugResponse>, Status> {
-        let message = request.into_inner();
-
-        Ok(Response::new(GetPollBySlugResponse {
-            id: 42069,
-            title: String::from("Absolutely unnecessary supermarket/darkstore delivery poll"),
-            kind: Some(PollKind { id: 0 }),
-            slug: message.slug,
-            options: vec![
-                poll_service::VoteOption {
-                    id: 0,
-                    title: String::from("Wolt Market"),
-                    description: Some(String::from("The greatest of them all")),
-                },
-                poll_service::VoteOption {
-                    id: 1,
-                    title: String::from("Bolt Market"),
-                    description: Some(String::from("No alcohol but works at late night")),
-                },
-                poll_service::VoteOption {
-                    id: 2,
-                    title: String::from("Glovo Delivery"),
-                    description: Some(String::from("Everything you can imagine")),
-                },
-            ],
-            finished: false,
-            ballot_id: 0,
-        }))
+        get_poll_by_slug(request).await
     }
 
     async fn submit_vote(

@@ -4,6 +4,8 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize)]
 pub struct Poll {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub name: String,
     pub kind: i32,
     pub slug: String,
@@ -12,6 +14,8 @@ pub struct Poll {
 
 #[derive(Serialize, Deserialize)]
 pub struct Ballot {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub poll_id: ObjectId,
     pub finished_at: Option<DateTime>,
     pub created_at: DateTime,
@@ -20,6 +24,8 @@ pub struct Ballot {
 
 #[derive(Serialize, Deserialize)]
 pub struct VoteOption {
+    #[serde(rename = "_id", skip_serializing_if = "Option::is_none")]
+    pub id: Option<ObjectId>,
     pub ballot_id: ObjectId,
     pub name: String,
     pub description: Option<String>,
