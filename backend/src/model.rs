@@ -34,6 +34,6 @@ pub struct VoteOption {
 
 #[derive(Serialize, Deserialize)]
 pub struct Vote {
-    option_ids: Vec<ObjectId>,
-    created_at: DateTime,
+    pub option_ids: Vec<ObjectId>,
+    pub created_at: DateTime,
 }
