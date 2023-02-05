@@ -192,7 +192,7 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     let data = data.clone();
 
     html! {
-      <div class="my-8 space-y-8">
+      <div class="my-8 space-y-8 w-full">
         <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight md:text-5xl">{data.title}</h1>
         if let Some(kind) = data.kind.map(|kind| poll_kind_id_to_label(kind.id)) {
           <p>{kind}</p>
