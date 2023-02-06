@@ -172,22 +172,25 @@ pub fn poll_form(PollFormProps { data, on_close }: &PollFormProps) -> Html {
     let data = data.clone();
 
     html! {
-      <div class="my-8 space-y-8 w-full">
-        <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight md:text-5xl">{data.title}</h1>
-        if let Some(kind) = data.kind.map(|kind| poll_kind_id_to_label(kind.id)) {
-          <p>{kind}</p>
-        }
-        <div>
-          {rows}
-        </div>
-        <div class="flex justify-between">
-          <div>
-            if !data.finished {
-              <button class="btn btn-outline" onclick={on_close}>{"Close the poll"}</button>
+        <div class="my-8 space-y-8 w-full">
+            <h1 class="mb-4 text-3xl font-bold leading-none tracking-tight md:text-5xl">{data.title}</h1>
+
+            if let Some(kind) = data.kind.map(|kind| poll_kind_id_to_label(kind.id)) {
+                <p>{kind}</p>
             }
-          </div>
-          <button class={submit_button_class} onclick={on_submit}>{submit_button_text}</button>
+
+            <div>{rows}</div>
+
+            <div class="flex justify-between">
+
+                <div>
+                    if !data.finished {
+                        <button class="btn btn-outline" onclick={on_close}>{"Close the poll"}</button>
+                    }
+                </div>
+
+                <button class={submit_button_class} onclick={on_submit}>{submit_button_text}</button>
+            </div>
         </div>
-      </div>
     }
 }
