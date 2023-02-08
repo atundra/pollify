@@ -55,6 +55,7 @@ message GetPollBySlugResponse {
   repeated VoteOption options = 5;
   bool finished = 6;
   string ballot_id = 7;
+  google.protobuf.Timestamp finished_at = 8;
 }
 
 message SubmitVoteRequest {
