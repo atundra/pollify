@@ -1,8 +1,42 @@
 use super::use_poll_service::use_poll_service;
 use crate::async_data::{AsyncData, ToAsyncData};
 use crate::codegen::poll_service::{GetPollBySlugRequest, GetPollBySlugResponse};
+use std::ops::Deref;
+use std::rc::Rc;
 use yew::prelude::*;
 use yew_hooks::{use_async_with_options, UseAsyncOptions};
+
+pub struct UsePollBySlugHandle<T, E> {
+    inner: AsyncData<T, E>,
+    run: Rc<dyn Fn()>,
+}
+
+impl<T, E> UsePollBySlugHandle<T, E> {
+    pub fn run(&self) {
+        (self.run)();
+    }
+}
+
+impl<T, E> Deref for UsePollBySlugHandle<T, E> {
+    type Target = AsyncData<T, E>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl<T, E> Clone for UsePollBySlugHandle<T, E>
+where
+    T: Clone,
+    E: Clone,
+{
+    fn clone(&self) -> Self {
+        Self {
+            inner: self.inner.clone(),
+            run: self.run.clone(),
+        }
+    }
+}
 
 /// It returns an `AsyncData` that will load the poll with the given slug
 ///
@@ -14,7 +48,7 @@ use yew_hooks::{use_async_with_options, UseAsyncOptions};
 ///
 /// An AsyncData<GetPollBySlugResponse, String>
 #[hook]
-pub fn use_poll_by_slug(slug: String) -> AsyncData<GetPollBySlugResponse, String> {
+pub fn use_poll_by_slug(slug: String) -> UsePollBySlugHandle<GetPollBySlugResponse, String> {
     let poll_service = use_poll_service();
     let handle = use_async_with_options(
         async move {
@@ -27,5 +61,16 @@ pub fn use_poll_by_slug(slug: String) -> AsyncData<GetPollBySlugResponse, String
         },
         UseAsyncOptions::enable_auto(),
     );
-    handle.to_async_data()
+
+    let run = {
+        let handle = handle.clone();
+        Rc::new(move || {
+            handle.run();
+        })
+    };
+
+    UsePollBySlugHandle {
+        inner: handle.to_async_data(),
+        run,
+    }
 }

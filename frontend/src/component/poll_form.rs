@@ -1,7 +1,5 @@
 use crate::{
-    codegen::poll_service::{
-        ClosePollRequest, GetPollBySlugResponse, SubmitVoteRequest, VoteOption,
-    },
+    codegen::poll_service::{GetPollBySlugResponse, SubmitVoteRequest, VoteOption},
     hooks::use_poll_service::use_poll_service,
     poll_kind::poll_kind_id_to_label,
     toast::use_toast,
@@ -28,10 +26,11 @@ fn current_timestamp() -> Timestamp {
 #[derive(Properties, PartialEq, Clone)]
 pub struct PollFormProps {
     pub data: GetPollBySlugResponse,
+    pub on_close: Callback<()>,
 }
 
 #[function_component(PollForm)]
-pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
+pub fn poll_form(PollFormProps { data, on_close }: &PollFormProps) -> Html {
     let toast = use_toast().unwrap();
 
     let prev_vote_storage = use_local_storage::<String>(format!("ballot:{}", data.ballot_id));
@@ -131,9 +130,7 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     };
 
     let on_submit = {
-        let poll_service = poll_service.clone();
         let data = data.clone();
-        let toast = toast.clone();
         Callback::from(move |_| {
             let ballot_id = data.ballot_id.clone();
             let toast = toast.clone();
@@ -166,26 +163,9 @@ pub fn poll_form(PollFormProps { data }: &PollFormProps) -> Html {
     };
 
     let on_close = {
-        let data = data.clone();
+        let on_close = on_close.clone();
         Callback::from(move |_| {
-            let toast = toast.clone();
-            let poll_service = poll_service.clone();
-            let data = data.clone();
-            spawn_local(async move {
-                let request = ClosePollRequest {
-                    ballot_id: data.ballot_id,
-                };
-
-                let response = poll_service
-                    .close_poll(request)
-                    .await
-                    .map_err(|_err| "Failed to close the poll");
-
-                match response {
-                    Ok(_) => toast.success("Poll closed"),
-                    Err(err) => toast.error(err),
-                }
-            })
+            on_close.emit(());
         })
     };
 
