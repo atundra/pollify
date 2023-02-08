@@ -14,6 +14,8 @@ service PollService {
   rpc SubmitVote(SubmitVoteRequest) returns (SubmitVoteResponse);
 
   rpc ClosePoll(ClosePollRequest) returns (ClosePollResponse);
+
+  rpc PollResult(PollResultRequest) returns (PollResultResponse);
 }
 
 message PollKind { int32 id = 1; }
@@ -66,3 +68,12 @@ message SubmitVoteResponse {}
 message ClosePollRequest { string ballot_id = 1; }
 
 message ClosePollResponse {}
+
+message PollResultRequest { string poll_id = 1; }
+
+message PollResultItem {
+  VoteOption vote_option = 1;
+  int32 votes_count = 2;
+}
+
+message PollResultResponse { repeated PollResultItem items = 1; }
