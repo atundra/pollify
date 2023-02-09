@@ -32,14 +32,16 @@ pub fn poll_results_table(PollResultTableProps { data }: &PollResultTableProps) 
             );
             let ratio = item.votes_count as f32 / total_votes as f32;
             let vote_option = item.vote_option.clone().unwrap();
-            
+
             // Pretty print percent value
             let percent = format!("{}", ((ratio * 10000.0).round() as i32) as f32 / 100.0);
 
             let votes_string = match item.votes_count {
-              1 => " vote",
-              _ => " votes",
+                1 => " vote",
+                _ => " votes",
             };
+
+            let progress_value = (ratio * 100.0).to_string();
 
             html! {
               <div class="flex items-center gap-x-4">
@@ -55,7 +57,7 @@ pub fn poll_results_table(PollResultTableProps { data }: &PollResultTableProps) 
                     <div>{item.votes_count}{votes_string}</div>
                   </div>
 
-                  <progress class={progress_classes} value={(ratio * 100.0).to_string()} max="100"></progress>
+                  <progress class={progress_classes} value={progress_value} max="100"></progress>
                 </div>
               </div>
             }
