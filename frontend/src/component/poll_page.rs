@@ -1,7 +1,7 @@
 use crate::{
     async_data::AsyncData,
     codegen::poll_service::ClosePollRequest,
-    component::poll_form::PollForm,
+    component::{poll_form::PollForm, poll_result::PollResult},
     hooks::{
         use_poll_by_slug::use_poll_by_slug, use_poll_service::use_poll_service,
         use_toast_on_async_data_error::use_toast_on_async_data_error,
@@ -33,6 +33,14 @@ pub fn poll_page(PollPageProps { slug }: &PollPageProps) -> Html {
             html! { <div class="flex items-center justify-center w-full"><progress class="progress progress-accent w-96"></progress></div> }
         }
         AsyncData::Loaded(data) => {
+            if data.finished {
+                return html! {
+                    <div class="container mx-auto px-4 min-h-screen items-center flex max-w-3xl">
+                        <PollResult poll={data}/>
+                    </div>
+                };
+            }
+
             let ballot_id = data.clone().ballot_id;
             let on_close = {
                 Callback::from(move |_| {

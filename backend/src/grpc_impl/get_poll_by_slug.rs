@@ -1,9 +1,18 @@
 use crate::{model, storage::DATABASE};
-use bson::doc;
+use bson::{doc, DateTime};
 use common::grpc::poll_service::{self, GetPollBySlugRequest, GetPollBySlugResponse};
 use futures::stream::TryStreamExt;
 use mongodb::options::FindOptions;
+use prost_types::Timestamp;
 use tonic::{Request, Response, Status};
+
+fn datetime_to_timestamp(datetime: DateTime) -> Timestamp {
+    let datetime = datetime.to_chrono();
+    Timestamp {
+        seconds: datetime.timestamp(),
+        nanos: datetime.timestamp_nanos() as i32,
+    }
+}
 
 pub async fn get_poll_by_slug(
     request: Request<GetPollBySlugRequest>,
@@ -83,6 +92,7 @@ pub async fn get_poll_by_slug(
         slug: poll.slug,
         options,
         finished: ballot.finished_at.is_some(),
+        finished_at: ballot.finished_at.map(datetime_to_timestamp),
         ballot_id: ballot_id.to_hex(),
     }))
 }

@@ -1,8 +1,7 @@
-use std::str::FromStr;
-
 use crate::storage::ballot;
 use bson::oid::ObjectId;
 use common::grpc::poll_service::{ClosePollRequest, ClosePollResponse};
+use std::str::FromStr;
 use tonic::{Request, Response, Status};
 
 pub async fn close_poll(

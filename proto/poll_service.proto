@@ -14,6 +14,8 @@ service PollService {
   rpc SubmitVote(SubmitVoteRequest) returns (SubmitVoteResponse);
 
   rpc ClosePoll(ClosePollRequest) returns (ClosePollResponse);
+
+  rpc PollResult(PollResultRequest) returns (PollResultResponse);
 }
 
 message PollKind { int32 id = 1; }
@@ -53,6 +55,7 @@ message GetPollBySlugResponse {
   repeated VoteOption options = 5;
   bool finished = 6;
   string ballot_id = 7;
+  google.protobuf.Timestamp finished_at = 8;
 }
 
 message SubmitVoteRequest {
@@ -66,3 +69,12 @@ message SubmitVoteResponse {}
 message ClosePollRequest { string ballot_id = 1; }
 
 message ClosePollResponse {}
+
+message PollResultRequest { string poll_id = 1; }
+
+message PollResultItem {
+  VoteOption vote_option = 1;
+  int32 votes_count = 2;
+}
+
+message PollResultResponse { repeated PollResultItem items = 1; }
